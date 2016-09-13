@@ -53,6 +53,7 @@ interface Bitmap {
 interface Historical {
     fun save(): Unit
     fun undo(): Unit
+    fun hardReset(): Unit
 }
 
 interface SaveableBitmap: Bitmap, Historical
@@ -81,6 +82,10 @@ class MemoryBitmap(val axiom: Bitmap): Bitmap by axiom, SaveableBitmap {
         head = Math.max(0, head - 1)
     }
 
+    override fun hardReset() {
+        head = 0
+    }
+
     override fun save() {
         head += 1
         for ((point, color) in changes) {
@@ -101,8 +106,9 @@ class SaveHistory<T>(initial: T) {
     }
 
     fun pushCommit(id: Int, item: T) {
-        val lastCommitId = commitChain.peek().first
-        if (id <= lastCommitId) throw InvalidStateException("Commit history is already ahead of commit id $id")
+        while (commitChain.peek().first > id) {
+            commitChain.pop()
+        }
         commitChain.push(Pair(id, item))
     }
 

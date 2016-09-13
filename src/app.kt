@@ -60,28 +60,32 @@ class Window(bitmap: Bitmap) : JFrame() {
 
 fun main(args: Array<String>) {
     val reader = BitmapReader(File("resources/font.bmp").toPath())
+    //val reader = BitmapReader(File("resources/karab.bmp").toPath())
     val bitmap = MemoryBitmap(reader.doThing())
     val window = Window(bitmap)
     window.isVisible = true
-    val r = Random()
+    val rand = Random()
     while (true) {
         window.waitForSpace()
-        val h1 = 90 + { h: Int -> if (h >= 0) h else -h } (r.nextInt() % (bitmap.dimY - 50))
-        val ratio: Double = 2 * ((h1.toDouble() / bitmap.dimY) - 0.5)
-        val amount = 100 * ratio
-        val decay = Math.max(1, (10 * Math.abs(ratio)).toInt())
-        DrawingUtils.warpX(bitmap, h1, amount.toInt(), decay)
-        DrawingUtils.warpX(bitmap, h1 - 30, - amount.toInt(), decay)
-        DrawingUtils.warpX(bitmap, h1 - 60, amount.toInt(), decay)
-        DrawingUtils.warpX(bitmap, h1 - 90, - amount.toInt(), decay)
-        DrawingUtils.whiteNoise(bitmap, 0.2)
+        //DrawingUtils.flicker(bitmap, 1.0)
+        DrawingUtils.drip(bitmap, 0.9, 500, {
+            Thread.sleep(100)
+            bitmap.save()
+            window.repaint()
+            val q = Math.abs(rand.nextInt().toDouble() / Int.MAX_VALUE)
+            if (0.1 > q) {
+                DrawingUtils.flicker(bitmap, 1.0)
+                window.repaint()
+                Thread.sleep(100)
+                bitmap.undo()
+                window.repaint()
+            }
+        })
+        window.waitForSpace()
+        bitmap.hardReset()
         window.repaint()
         Thread.sleep(100)
-        bitmap.undo()
-        bitmap.undo()
-        bitmap.undo()
-        bitmap.undo()
-        bitmap.undo()
-        window.repaint()
+        //Thread.sleep(100)
+        //bitmap.undo()
     }
 }
