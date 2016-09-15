@@ -3,6 +3,55 @@ import java.util.*
 object DrawingUtils {
     private val rand = Random()
 
+    fun explode(bm: Bitmap, x: Int, y: Int, clearColor: Color, radius: Int, update: () -> Unit) {
+    }
+
+    fun disperse(bm: Bitmap, clearColor: Color = Color.WHITE, update: () -> Unit) {
+        var floaters: Set<Pair<Int, Int>> = calculateFloaters(bm, clearColor)
+        while (true) {
+            floaters = floaters.flatMap { p ->
+                val (x, y) = p
+                val dirH = if (randomDo(0.5)) -1 else 1
+                val dirV = if (randomDo(0.3)) -1 else 1
+                bm.set(x, y, Color.WHITE)
+                if (x + dirH < bm.dimX && y + dirV < bm.dimY && x + dirH >= 0 && y + dirV >= 0) {
+                    bm.set(x + dirH, y + dirV, Color.BLACK)
+                    listOf(Pair(x + dirH, y + dirV))
+                } else {
+                    emptyList()
+                }
+            }.toSet()
+            update()
+            floaters += calculateFloaters(bm, clearColor)
+        }
+    }
+
+    fun calculateFloaters(bm: Bitmap, clearColor: Color): Set<Pair<Int, Int>> {
+        var floaters: Set<Pair<Int, Int>> = emptySet()
+        for (x in 0..bm.dimX-1) {
+            var first: Pair<Int, Int>? = null
+            var last: Pair<Int, Int>? = null
+            for (y in 0..bm.dimY-1) {
+                if (first == null && bm.get(x, y) != clearColor) {
+                    first = Pair(x, y)
+                }
+
+                if (bm.get(x, y) != clearColor) {
+                    last = Pair(x, y)
+                }
+            }
+
+            if (first != null && last != null) {
+                floaters += first
+                floaters += last
+            }
+        }
+
+        return floaters
+    }
+
+    private fun randomDo(p: Double): Boolean = p >= (Math.abs(rand.nextInt().toDouble() / Int.MAX_VALUE))
+
     fun drip(bm: Bitmap, fallOff: Double, count: Int, update: () -> Unit) {
         val p = 0.1
         var drips = (0..bm.dimX-1)

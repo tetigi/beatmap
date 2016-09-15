@@ -64,10 +64,15 @@ fun main(args: Array<String>) {
     val bitmap = MemoryBitmap(reader.doThing())
     val window = Window(bitmap)
     window.isVisible = true
-    val rand = Random()
     while (true) {
         window.waitForSpace()
         //DrawingUtils.flicker(bitmap, 1.0)
+        DrawingUtils.disperse(bitmap, Color.WHITE, {
+            Thread.sleep(50)
+            bitmap.save()
+            window.repaint()
+        })
+        /*
         DrawingUtils.drip(bitmap, 0.9, 500, {
             Thread.sleep(100)
             bitmap.save()
@@ -81,6 +86,7 @@ fun main(args: Array<String>) {
                 window.repaint()
             }
         })
+        */
         window.waitForSpace()
         bitmap.hardReset()
         window.repaint()

@@ -1,1 +1,5 @@
 resources/
+lib/
+out/
+*.iml
+.idea

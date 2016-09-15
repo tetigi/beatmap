@@ -46,6 +46,7 @@ class BitmapReader(path: Path) {
 interface Bitmap {
     val dimX: Int
     val dimY: Int
+    val colors: Set<Color>
     fun get(x: Int, y: Int): Color
     fun set(x: Int, y: Int, c: Color)
 }
@@ -61,10 +62,13 @@ interface SaveableBitmap: Bitmap, Historical
 class RawBitmap(override val dimX: Int, override val dimY: Int): Bitmap {
     val data: Array<Array<Color>> = Array(dimX, { Array(dimY, { Color.BLACK })})
 
+    override var colors: Set<Color> = emptySet()
+
     override fun get(x: Int, y: Int): Color = data[x][y]
 
     override fun set(x: Int, y: Int, c: Color) {
-        data[x][y] = c
+        data[x][y] = if (c.alpha < 255) Color.WHITE else Color.BLACK
+        colors += data[x][y]
     }
 }
 
